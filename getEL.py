@@ -23,8 +23,8 @@ import xlrd
 #%%---Function to import the EL data and generating an module average. 
 
 
-def getEL(file_path):
-    wb = xlrd.open_workbook(file_path)
+def getEL(file_path_EL):
+    wb = xlrd.open_workbook(file_path_EL,"r")
     
     #Cells imported clockwise
     #ModuleIDs = [str(int(wb.sheet_by_name(sheet).cell_value(0,0))) for sheet in  wb.sheet_names()]
@@ -41,5 +41,5 @@ def getEL(file_path):
     return EL_int_data, EL_int_av
 
 if __name__ == "__main__":
-    file_path_EL = 'C:\\Users\\io318\\OneDrive - Norwegian University of Life Sciences\\skole\\Master IFE BIPV\\EL-bilder\\Til Jonas\\6018xx-191015-test-tif\\6018xx-191015_Iav.xlsx'
+    file_path_EL = 'C:\\Users\\jonas\\OneDrive - Norwegian University of Life Sciences\\skole\\Master IFE BIPV\\EL-bilder\\Til Jonas\\6018xx-191015-test-tif\\6018xx-191015_Iav.xlsx'
     EL_int_data,EL_int_av = getEL(file_path_EL)

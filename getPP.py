@@ -28,10 +28,10 @@ Prerequisites for the script to work are
 """
 
 import os
-import matplotlib.pyplot as plt
 import pandas as pd
 import glob
 import numpy as np
+
 
 #%%------------Function for importing the light_IV data
 def getLIVdata(folder_with_data):
@@ -56,7 +56,7 @@ def getLIVdata(folder_with_data):
             
             # pick out irradiance
             IV_irradiance = pd.read_csv(file, skiprows=9, nrows=1)
-            IV_irradiance = int(IV_irradiance.columns[1])*10  # converting from mW/cm^2 to W/m^2
+            IV_irradiance = int(float(IV_irradiance.columns[1]))*10  # converting from mW/cm^2 to W/m^2
     
             
             #import IV-data into a temporary dataframe, and clean it up a bit
@@ -94,8 +94,34 @@ def getPP(IRRADIANCE,folder_with_data):
     parameter_values = pd.DataFrame(parameter_values,columns=performance_parameter,index=moduleIDs)
     return parameter_values
 
+def getELPP(folder_with_data):
+    os.chdir(folder_with_data)
+    feedback_PP = {}
+    #file ={}
+    files = glob.glob(os.getcwd() + '\\*.txt') # get all 
+    
+    for filename in files:
+        file = pd.read_csv(filename,delim_whitespace=True\
+                                      ,skiprows=8,nrows=2,header=None,decimal=',')
+        moduleIDs = filename.split('Til Jonas\\')[1].split('-')[0]
+        feedback_PP[moduleIDs] = file[[3,4]].rename(columns={3:'I',4:'V'})
+    moduleIDs = [file.split('Til Jonas\\')[1].split('-')[0] for file in files]
+    moduleIDs = np.unique(np.array(moduleIDs))
+    param = ['I','V']
+    feedback_PP_high = [[feedback_PP[moduleID].loc[0][param[0]]\
+                         ,feedback_PP[moduleID].loc[0][param[1]]] for moduleID in moduleIDs]
+    feedback_PP_low = [[feedback_PP[moduleID].loc[1][param[0]]\
+                     ,feedback_PP[moduleID].loc[1][param[1]]] for moduleID in moduleIDs]
+
+    feedback_PP_high = pd.DataFrame(feedback_PP_high,columns=param,index=moduleIDs)
+    feedback_PP_low = pd.DataFrame(feedback_PP_low,columns=param,index=moduleIDs)
+    
+    return feedback_PP,feedback_PP_high,feedback_PP_low
+        
 if __name__ == '__main__':
-    folder_with_data = ('C:\\Users\\io318\\OneDrive - Norwegian University of Life Sciences\\skole\\Master IFE BIPV\\EL-bilder\\Til Jonas')
+    folder_with_data = ('C:\\Users\\jonas\\OneDrive - Norwegian University of Life Sciences\\skole\\Master IFE BIPV\\EL-bilder\\Til Jonas')
     moduleIDs,lightIV_data, lightIV_parameters = getLIVdata(folder_with_data)
     parameter_values = getPP(1000,folder_with_data)
-    
+    v,h,l = getELPP(folder_with_data)
+    hi = h['I'].transpose()
+    G = h['I']/parameter_values['Isc']
